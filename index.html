@@ -22,6 +22,7 @@ console.log(n);
 
 
 
+
 //demo2
 let n = 10,
     m = 20;
@@ -34,6 +35,8 @@ let n = 10,
 console.log(n, m);   //10,20，形参n，m的值，不会影响到变量n，m的值
 
 
+
+
 //demo3
 let ary = [12, 23, 34, 45];
 (function (ary) {
@@ -43,6 +46,8 @@ let ary = [12, 23, 34, 45];
     console.log(ary);  //[23,34]
 })(ary);
 console.log(ary);  //[12,23,34]
+
+
 
 
 //demo4
@@ -99,6 +104,215 @@ console.log(i);
 	    i = 24
 
 */
+
+
+
+
+//demo5
+let n = 10,
+    obj = {n: 20};
+let fn = obj.fn = (function () {
+    this.n++;
+    n++;
+    console.log(n);
+    return function (m) {
+        n += 10 + (++m);
+        this.n += n;
+        console.log(n);
+    }
+})(obj.n);
+fn(10);
+obj.fn(10);
+console.log(n, obj.n);
+
+/*
+解析:
+	1. 匿名函数自执行：
+		1. this.n++：this指向window，全局n是用let声明的，不会和window相映射，所以window.n是undefined，window.n++ = NaN，
+		2. n++后n为11
+
+	2. fn(10);
+		执行：function (m) {
+		        n += 10 + (++m);
+		        this.n += n;
+		        console.log(n);
+		    }
+
+		此时，n为全局的n是11，m是参数10
+		n = 11 + 10 + 11 = 32;
+		this.n = window.NaN = NaN + 32 = NaN;
+
+	3. obj.fn(10);
+		执行：function (m) {
+		        n += 10 + (++m);
+		        this.n += n;
+		        console.log(n);
+		    }
+		此时，n是fn(10)存下来的值是32
+		n = 32 + 10 + 11 = 53;
+		this.n = obj.n = 20 + 53 = 73;
+
+	4. console.log(n, obj.n);
+		全局的n是32，obj.n是73
+*/
+
+
+
+
+//demo6
+let a = {n: 4};
+let b = a;  // b = {n:4}
+b.x = a = {n: 10};  // b:{n:4,x:{n:10}}  a = {n:10}
+console.log(a.x);  //undefined
+console.log(b.x);  //{n:10}
+
+
+
+
+//demo7
+function C1(name) {
+    if (name) this.name = name;
+}
+function C2(name) {
+    this.name = name;
+}
+function C3(name) {
+    this.name = name || 'join';
+}
+C1.prototype.name = 'Tom';
+C2.prototype.name = 'Tom';
+C3.prototype.name = 'Tom';
+alert(new C1().name + new C2().name + new C3().name);
+
+/*
+解析:
+	1. new C1().name:
+		实例化对象new C1()没有传参，所以类C1的形参的值是undefined，所以不会进入if判断里面，所以类中没有name属性，所以去原型上查找，找到'Tom'
+
+	2. new C2().name:
+		实例化对象new C1()没有传参，所以类C2的形参的值是undefined，所以C3{}里面this.name等于 形参的name 等于 'undefined'
+
+	3. new C3().name:
+		实例化对象new C1()没有传参，所以类C2的形参的值是undefined，所以 形参name 是 'undefined'，所以name||'join' 等于 'join'
+
+	所以alert Tomundefinedjoin
+*/
+
+
+
+
+//demo8
+let m = 20;
+let Fn = function (n, m) {
+    this.n = n;
+    this.aa = function () {
+        console.log(this.n + (++m));
+    }
+};
+Fn.prototype.bb = function () {
+    console.log(this.n + m);
+};
+let f1 = new Fn(10, 20);
+Fn.prototype = {
+	cc:function(){
+		console.log(this.n + m);
+	}
+}
+let f2 = new Fn();
+console.log(f1.constructor === f2.constructor);   //false
+f1.aa();
+f1.bb();
+console.log(f1.__proto__.bb);
+f1.__proto__.bb();
+f1.cc();
+f2.bb();
+f2.cc();
+f2.__proto__.cc();
+
+/*
+解析:
+	1. console.log(f1.constructor === f2.constructor);
+		f1和f2都是new Fn得到的，但是constructor在类上，是私有属性，所以两者是不同的
+
+	2. f1.aa();
+		先执行：let f1 = new Fn(10, 20); 得到this.n = n = 10, m = 20;
+		打印：10 + 21 = 31;
+
+	3. f1.bb();
+		this.n + m = 10 + 全局的m是20 = 30
+
+	4. f1.__proto__.bb()
+		bb()方法，前面是f1.__proto__也就是Fn.prototype，所以这个方法里面的this指向的是Fn.prototype，而this.n没有就是undefined，所以this.n + m = undefined + 20 = NaN
+
+	5. fl.cc();
+		在声明f1时，Fn这个类上和原型上，只有aa()和bb()，没有cc()，所以报错
+
+	6. f2.bb();
+		在声明f2时，Fn.prototype已经被赋值了，里面只有cc()，没有bb()
+
+	7. f2.cc();
+		f2中没有传参，所以this.n的是值是undefined，所以this.n + m = undefined + 20 = NaN
+		
+	8. f2.__proto__.cc();
+		在声明f2时，Fn.prototype已经被赋值了一个对象，cc()里面的this指向这个对象，这个对象下没有n这个属性，所以是undefined，所以this.n + m = undefined + 20 = NaN
+*/
+
+
+
+
+//demo9
+document.onclick = function(){
+	let obj = {
+		n:10,
+		fn(){
+			console.log(this.n);
+		}
+	}
+	setTimeout(obj.fn,1000);  //undefined
+	// setTimeout(obj.fn(),2000);   //10
+}
+
+/*
+解析:
+	1. setTimeout(obj.fn,1000);
+		obj.fn => function(){
+			console.log(this.n);
+		}
+		此时，obj.fn是一个单纯的函数，里面的this指向window，而window下面没有n，因此，打印undefined
+
+	2. setTimeout(obj.fn(),2000);
+		此时，调用obj.fn()，this指向obj，obj下面有n，因此，打印10
+*/
+
+
+
+
+//demo10
+function People() {}
+var p = new People();
+console.log(p.__proto__ == People.prototype)  //true
+console.log(People.__proto__ === Function.prototype)  //true
+console.log(People.prototype.__proto__ === Object.prototype ) //true ***
+
+
+
+
+//demo11
+console.log(Function.prototype === Function.__proto__)  //true
+console.log(Function.prototype === Object.__proto__)  //true ***
+console.log(Function.__proto__ === Object.__proto__)  //true ***
+console.log(Function.prototype.__proto__ === Object.prototype)  //true
+console.log(Function instanceof Object)  //true
+
+
+
+
+//demo12
+console.log(Object instanceof Function)  //true
+console.log(Function instanceof Object)  //true
+console.log(Function instanceof Function)  //true
+console.log(Object instanceof Object)  //true ***
+
 
 </script>
 </body>
