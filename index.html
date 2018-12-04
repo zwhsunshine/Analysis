@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Analysis</title>
+</head>
+<body>
+<script type="text/javascript">
+//demo1
+if ('m' in window) {
+    var m = m && 12;
+}
+console.log(m);  //undefined
+let n = 10;
+if (!('n' in window)) {
+	console.log(n);
+	//报错，在if(){}这个块级作用域中，有var或者let，就不会去外层查找，但是，虽然这个域中有let，但是有暂存死区，所以报错
+	
+    let n = n + 30;
+}
+console.log(n);
+
+
+
+//demo2
+let n = 10,
+    m = 20;
+~function (n, m) {
+    let arg = arguments;
+    arg[0] = n || 100;
+    arg[1] = m || 200;  //arg[i]的值为200,但是不影响m的值
+    console.log(n, m);  //20,undefined
+}(m);
+console.log(n, m);   //10,20，形参n，m的值，不会影响到变量n，m的值
+
+
+//demo3
+let ary = [12, 23, 34, 45];
+(function (ary) {
+    ary.pop();
+    ary = ary.slice(0);  //此时，ary的值为一个新的数组，不再指向之前的地址
+    ary.shift();
+    console.log(ary);  //[23,34]
+})(ary);
+console.log(ary);  //[12,23,34]
+
+
+//demo4
+let i = 0;
+let fn = function (n) {
+    i += 2;
+    return function (m) {
+        i += (++n) + (m--);
+        console.log(i);
+    }
+};
+let f = fn(2);
+f(3);
+fn(2)(3); 
+f(4);
+console.log(i);
+
+/*
+解析:
+	1. let f = fn(2);  此时，会执行fn(2)，全局的 i=2
+
+	2. f(3);
+		执行：function (m) {
+		        i += (++n) + (m--);
+		        console.log(i);
+		    }
+
+		此时，i是全局的i=2，n是参数2，m是参数3
+		i = 2 + 3 + 3 = 8;
+
+	3. fn(2)(3);
+		执行：function (n) {
+			    i += 2;
+			    return function (m) {
+			        i += (++n) + (m--);
+			        console.log(i);
+			    }
+			};
+		i = 8 + 2 = 10;
+
+		此时，i是全局的i=10，n是参数2，m是参数3
+		i = 10 + 3 + 3 = 16;
+
+	4. f(4);
+		执行：function (m) {
+		        i += (++n) + (m--);
+		        console.log(i);
+		    }
+
+		此时，i是全局的i=16，n是f(3)存下来的值3，m是参数4
+		i = 16 + 4 + 4 = 24;
+
+	5. console.log(i);
+	    i = 24
+
+*/
+
+</script>
+</body>
+</html>
