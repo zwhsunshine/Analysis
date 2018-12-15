@@ -140,15 +140,14 @@ box.onclick = function(){
 
 /*
 解析：
-    1. 在这里，为什么我们每次都要return new Promise()？
+    1. 为什么我们每次都要return new Promise()？
 
         1. 如下代码的then()的链式调用，类似$('#box').addClass().siblign().removeClass()，（可以查看jquery库封装的有些方法，在执行完之后return this）
         2. 每次调用方法之后return this，此时的this给接下来再调用的方法使用，即下面的方法的主是上一个方法中返回的this，这样就做到了上一步执行完时候才会执行下一步，then就是这样做到的
 
 
     2. then的回调函数的参数是取的哪里的值？
-
-        1. 
+ 
         //先举个栗子，预热一下（Promise.prototype.then()前夕）
         let p = new Promise(resolve=>{
             resolve({name:'3333',age:12})
@@ -158,7 +157,7 @@ box.onclick = function(){
         })
         //因为then()中可传两个参数，第一个参数是成功函数（resolve），第二个是失败函数（reject），此时的then里面回调函数的位置在第一个参数的位置，说明是成功函数，此时的then的回调函数中的形参v，就是调用resolve函数时，传入的实参（{name:'3333',age:12}）
 
-        2. 因此，then中回调函数中的形参是取的上一个then()中的调用resolve()时传入的实参
+        因此，then中回调函数中的形参是取的值是上一个then()中的调用resolve()时传入的实参
 
 */
 
