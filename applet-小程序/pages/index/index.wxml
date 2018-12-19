@@ -1,0 +1,13 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="usermotto">
+    <text class="user-motto">{{motto}}</text>
+  </view>
+  <view><image src='xcx1.png' width='100%' height='auto' ></image></view>
+  <view>
+    <text>view标签中可以放入其他标签</text>
+  </view>
+  <text>
+    <text>text标签中只可以放入text标签</text>
+  </text>
+</view>
